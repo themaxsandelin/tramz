@@ -1,0 +1,20 @@
+{
+  "name": "tramz",
+  "version": "1.0.0",
+  "description": "Next level public transit.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": {
+    "name": "Max Sandelin",
+    "email": "hello@maxsandelin.com",
+    "url": "https://maxsandelin.com"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^4.0.0",
+    "request": "^2.81.0"
+  }
+}
