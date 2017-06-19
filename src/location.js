@@ -8,6 +8,23 @@ const Store = require('./store.js')();
 
 function Location () {
 
+  function listStops () {
+    const data = Store.getAllStops();
+    console.log('');
+    console.log('');
+    console.log('These are your locally saved stops.');
+    console.log('');
+    console.log('----------------------------------------------------------------------');
+    console.log('');
+    const stops = Object.keys(data);
+    stops.forEach((stop) => {
+      console.log(stop + ': ' + data[stop].name + ' (id: ' + data[stop].id + ')');
+      console.log('');
+    });
+    console.log('----------------------------------------------------------------------');
+    console.log('');
+  }
+
   function addNewStop (string) {
     const rl = readline.createInterface({
       input: process.stdin,
@@ -85,7 +102,8 @@ function Location () {
   }
 
   return {
-    addNewStop
+    addNewStop,
+    listStops
   }
 }
 
