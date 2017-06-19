@@ -2,12 +2,16 @@
 const dotenv = require('dotenv').config();
 
 // Modules
-const Core = require('./src/core.js')();
+const Location = require('./src/location.js')();
 
-Core.getToken()
-  .then((results) => {
-    console.log(results);
-  })
-.catch((error) => {
-  console.log(error);
-});
+const args = process.argv.splice(2, process.argv.length);
+
+if (args[0] === 'location') {
+  if (args[1] === 'add') {
+    if (args[2]) {
+      return Location.addNewStop(args[2]);
+    }
+  }
+}
+
+console.log('Invalid command.');

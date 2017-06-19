@@ -15,7 +15,7 @@ function Core () {
       }, (error, response, body) => {
         if (error) reject(error);
 
-        resolve(body);
+        resolve(JSON.parse(body).access_token);
       });
     });
   }
