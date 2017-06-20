@@ -67,7 +67,6 @@ function Trip () {
             console.log('');
             trips.forEach((trip, i) => {
               const parts = trip.Leg;
-              // console.log(parts);
 
               if (!i) {
                 console.log('----------------------------------------------------------------------');
@@ -81,12 +80,12 @@ function Trip () {
                       console.log('Gå till ' + part.Destination.name + ' Läge ' + part.Destination.track);
                     }
                   } else {
-                    console.log('['+part.Origin.rtTime+' - ' + part.Destination.rtTime + '] ' + part.name + ' \t( ' + Core.simplifyStopName(part.Origin.name) + ' [' + part.Origin.track + '] -> ' + Core.simplifyStopName(part.Destination.name) + ' [' + part.Origin.track + '] )');
+                    console.log('['+part.Origin.time+' - ' + part.Destination.time + '] ' + part.name + ' \t( ' + Core.simplifyStopName(part.Origin.name) + ' [' + part.Origin.track + '] -> ' + Core.simplifyStopName(part.Destination.name) + ' [' + part.Origin.track + '] )');
                   }
                 });
               } else {
                 const part = parts;
-                console.log('['+part.Origin.rtTime+' - ' + part.Destination.rtTime + '] ' + part.name + ' – ' + Core.simplifyStopName(part.Origin.name) + ' -> ' + Core.simplifyStopName(part.Destination.name));
+                console.log('['+part.Origin.time+' - ' + part.Destination.time + '] ' + part.name + ' – ' + Core.simplifyStopName(part.Origin.name) + ' -> ' + Core.simplifyStopName(part.Destination.name));
               }
             });
             console.log('----------------------------------------------------------------------');
