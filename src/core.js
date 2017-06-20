@@ -1,3 +1,5 @@
+// Dependencies
+const dotenv = require('dotenv').config();
 const request = require('request');
 
 function Core () {
@@ -20,8 +22,13 @@ function Core () {
     });
   }
 
+  function simplifyStopName (name) {
+    return (name.indexOf(',' > -1)) ? name.substring(0, name.indexOf(',')):name;
+  }
+
   return {
-    getToken
+    getToken,
+    simplifyStopName
   }
 }
 

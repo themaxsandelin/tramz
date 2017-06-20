@@ -1,5 +1,6 @@
 // Dependencies
 const fs = require('fs');
+const readline = require('readline');
 
 function Store () {
   const storeFile = './store/store.json';
@@ -12,18 +13,47 @@ function Store () {
     return JSON.parse(fs.readFileSync(storeFile, 'utf8')).stops;
   }
 
-  function addNewStop (key, stop) {
+  function getStop (key) {
+    if (!store.stops[key]) return false;
+
+    return store.stops[key];
+  }
+
+  function addStop (stop) {
     return new Promise((resolve, reject) => {
-      if (!store.stops) store.stops = {};
-      store.stops[key] = stop;
-      fs.writeFileSync(storeFile, JSON.stringify(store));
-      resolve();
+      const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+      });
+
+      rl.question('Now, what would you like to save this stop as?\n', (name) => {
+        if (!name) {
+          rl.close();
+          console.log('Yeah, you need to actually write something to choose a name?');
+          return console.log('Try again.');
+        }
+
+        if (!store.stops) store.stops = {};
+        store.stops[name] = stop;
+        fs.writeFileSync(storeFile, JSON.stringify(store));
+        console.log('Success! The stop ' + stop.name + ' was saved as ' + name +'.');
+        rl.close();
+
+        resolve();
+      });
     });
   }
 
+  function removeStop (stop) {
+    delete store.stops[stop];
+    fs.writeFileSync(storeFile, JSON.stringify(store));
+  }
+
   return {
-    addNewStop,
-    getAllStops
+    addStop,
+    getAllStops,
+    getStop,
+    removeStop
   };
 }
 
