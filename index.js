@@ -13,9 +13,32 @@ if (args[0] === 'stops') {
     if (args[2]) {
       return Location.remove(args[2]);
     }
-  } else if (args[1] === 'list') {
+  } else {
     return Location.list();
   }
+} else if (args[0] === 'trips') {
+  if (args[1] === 'add') {
+
+  }
+} else {
+  if (args[0]) {
+    const action = args[0];
+
+    if (args[1]) {
+      const orig = action;
+      const dest = args[1];
+      const via = (args[2]) ? args[2]:false;
+
+      return Trip.search([
+        { name: 'origin', string: orig },
+        { name: 'destination', string: dest },
+        { name: 'via', string: via }
+      ]);
+    }
+  }
+}
+
+/*
 } else if (args[0] === 'from') {
   if (args[2] === 'to') {
     const origin = args[1];
@@ -26,5 +49,6 @@ if (args[0] === 'stops') {
     return Trip.search(origin, destination, fast);
   }
 }
+*/
 
 console.log('Invalid command.');

@@ -1,98 +1,89 @@
 // Dependencies
 const request = require('request');
 const moment = require('moment');
+const async = require('async');
 
 // Modules
 const Core = require('./core.js')();
-const Store = require('./store.js')();
 const Location = require('./location.js')();
 
 function Trip () {
 
-  function search (from, to, fast) {
-    const now = moment();
-    let fromStop = Store.getStop(from);
-    let toStop = Store.getStop(to);
+  function search (params) {
+    Core.getToken()
+      .then(token => defineOptions(token))
+    .catch(error => console.log(error));
 
-    let orig = (fromStop) ? fromStop.id:undefined;
-    let dest = (toStop) ? toStop.id:undefined;
-    const date = now.format('YYYY-MM-DD');
-    const time = now.format('HH:mm');
+    function defineOptions (token) {
+      const now = moment();
+      const options = {
+        token: token,
+        date: now.format('YYYY-MM-DD'),
+        time: now.format('HH:mm')
+      };
 
-    if (!orig) {
-      Location.find(from, fast)
-        .then((stop) => {
-          fromStop = stop;
-          orig = stop.id;
-          if (!dest) {
-            Location.find(to, fast)
-              .then((stop) => {
-                toStop = stop;
-                dest = stop.id;
-                performSearch();
-              })
-            .catch(error => console.log(error));
-          }
-        })
-      .catch(error => console.log(error));
-    } else {
-      if (!dest) {
-        Location.find(to, fast)
-          .then((stop) => {
-            toStop = stop;
-            dest = stop.id;
-            performSearch();
-          })
-        .catch(error => console.log(error));
-      } else {
-        performSearch();
-      }
+      async.eachSeries(params, (obj, callback) => {
+        if (!obj.string) return callback();
+
+        if (Core.getStop(obj.string)) {
+          options[obj.name] = Core.getStop(obj.string);
+          callback();
+        } else {
+          Location.find(obj.string, token)
+            .then((stop) => {
+              options[obj.name] = stop;
+              callback();
+            })
+          .catch(error => callback(error));
+        }
+      }, (err) => {
+        if (err) return console.log('Shit, something bad happened..!', err);
+
+        findTrip(options);
+      });
     }
 
-    function performSearch () {
-      // TODO: Add ability to search via another stop
+    function findTrip (options) {
+      const url = Core.buildTripUrl(options);
+      request.get(url, {
+        headers: { 'Authorization': 'Bearer ' + options.token }
+      }, (err, res, body) => {
+        const trips = JSON.parse(body).TripList.Trip;
 
-      const url = 'https://api.vasttrafik.se/bin/rest.exe/v2/trip?originId=' + orig + '&destId=' + dest + '&date=' + date + '&time=' + time + '&format=json';
-      Core.getToken()
-        .then((token) => {
-          request.get(url, {
-            headers: { 'Authorization': 'Bearer ' + token }
-          }, (error, response, body) => {
-            const trips = JSON.parse(body).TripList.Trip;
+        const origin = Core.simplifyStopName(options.origin.name);
+        const destination = Core.simplifyStopName(options.destination.name);
+        const via = (options.via) ? Core.simplifyStopName(options.via.name):false;
 
-            console.log('');
+        console.log('');
+        console.log('----------------------------------------------------------------------');
+        console.log('');
+        console.log(origin + ' -> ' + ((via) ? via + ' -> ':'') + destination);
+        console.log('');
+        trips.forEach((trip, i) => {
+          const parts = trip.Leg;
+
+          if (!i) {
             console.log('----------------------------------------------------------------------');
-            console.log('');
-            console.log(Core.simplifyStopName(fromStop.name) + ' -> ' + Core.simplifyStopName(toStop.name));
-            console.log('');
-            trips.forEach((trip, i) => {
-              const parts = trip.Leg;
-
-              if (!i) {
-                console.log('----------------------------------------------------------------------');
+          } else {
+            console.log('-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -');
+          }
+          if (parts.length > 1) {
+            parts.forEach((part) => {
+              if (part.type === 'WALK') {
+                if (part.Origin.name !== part.Destination.name) {
+                  console.log('Gå till ' + part.Destination.name + ' Läge ' + part.Destination.track);
+                }
               } else {
-                console.log('-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -');
-              }
-              if (parts.length > 1) {
-                parts.forEach((part) => {
-                  if (part.type === 'WALK') {
-                    if (part.Origin.name !== part.Destination.name) {
-                      console.log('Gå till ' + part.Destination.name + ' Läge ' + part.Destination.track);
-                    }
-                  } else {
-                    console.log('['+part.Origin.time+' - ' + part.Destination.time + '] ' + part.name + ' \t( ' + Core.simplifyStopName(part.Origin.name) + ' [' + part.Origin.track + '] -> ' + Core.simplifyStopName(part.Destination.name) + ' [' + part.Origin.track + '] )');
-                  }
-                });
-              } else {
-                const part = parts;
-                console.log('['+part.Origin.time+' - ' + part.Destination.time + '] ' + part.name + ' – ' + Core.simplifyStopName(part.Origin.name) + ' -> ' + Core.simplifyStopName(part.Destination.name));
+                console.log('['+part.Origin.time+' - ' + part.Destination.time + '] ' + part.name + ' \t( ' + Core.simplifyStopName(part.Origin.name) + ' [' + part.Origin.track + '] -> ' + Core.simplifyStopName(part.Destination.name) + ' [' + part.Origin.track + '] )');
               }
             });
-            console.log('----------------------------------------------------------------------');
-          });
-
-        })
-      .catch(error => console.log(error));
+          } else {
+            const part = parts;
+            console.log('['+part.Origin.time+' - ' + part.Destination.time + '] ' + part.name + ' – ' + Core.simplifyStopName(part.Origin.name) + ' -> ' + Core.simplifyStopName(part.Destination.name));
+          }
+        });
+        console.log('----------------------------------------------------------------------');
+      });
     }
   }
 

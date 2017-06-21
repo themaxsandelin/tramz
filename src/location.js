@@ -4,47 +4,55 @@ const readline = require('readline');
 
 // Modules
 const Core = require('./core.js')();
-const Store = require('./store.js')();
 
 function Location () {
 
   function list () {
-    const data = Store.getAllStops();
-    console.log('');
-    console.log('');
-    console.log('These are your locally saved stops.');
-    console.log('');
-    console.log('----------------------------------------------------------------------');
-    console.log('');
-    const stops = Object.keys(data);
-    stops.forEach((stop) => {
-      console.log(stop + ': ' + data[stop].name + ' (id: ' + data[stop].id + ')');
+    const stops = Core.getAllStops();
+    const names = Object.keys(stops);
+    if (!names.length) {
       console.log('');
-    });
-    console.log('----------------------------------------------------------------------');
-    console.log('');
+      console.log('You haven\'t saved any stops yet.');
+      console.log('');
+    } else {
+      console.log('');
+      console.log('----------------------------------------------------------------------');
+      names.forEach((name, i) => {
+        if (i) console.log('-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -');
+        console.log('[' + name + '] – ' + stops[name].name);
+      });
+      console.log('----------------------------------------------------------------------');
+      console.log('');
+    }
   }
 
   function add (string) {
     find(string)
-      .then(stop => Store.addStop(stop))
+      .then(stop => Core.addStop(stop))
     .catch(error => console.log(error));
   }
 
   function remove (string) {
-    if (!Store.getStop(string)) return console.log('Could not found a location by the name of ' + string);
+    if (!Core.getStop(string)) return console.log('Could not find a location by the name of ' + string);
 
-    Store.removeStop(string);
+    Core.removeStop(string);
     console.log(string + ' was successfully removed.');
   }
 
-  function find (string, fast) {
+  function find (string, token) {
     return new Promise((resolve, reject) => {
-      Core.getToken()
-        .then(token => search(string, token))
-        .then(stops => choose(stops, string, fast))
-        .then(stop => resolve(stop))
-      .catch(error => reject(error));
+      if (token) {
+        search(string, token)
+          .then(stops => choose(stops, string))
+          .then(stop => resolve(stop))
+        .catch(error => reject(error));
+      } else {
+        Core.getToken()
+          .then(token => search(string, token))
+          .then(stops => choose(stops, string))
+          .then(stop => resolve(stop))
+        .catch(error => reject(error));
+      }
     });
   }
 
@@ -61,7 +69,6 @@ function Location () {
       }, (error, response, body) => {
         if (error) console.log(error);
 
-        console.log('Done!');
         resolve(JSON.parse(body).LocationList.StopLocation);
       });
     });
