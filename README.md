@@ -19,6 +19,10 @@ Will search for a trip from **origin** to **destination**, with an optional **vi
 ```bash
 $ tramz 'Askims Stationsväg' 'Solrosgatan' 'Nordstan'
 ```
+This also works for locally saved stops.
+```bash
+$ tramz home work starbucks
+```
 
 ### Stops
 
