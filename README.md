@@ -22,25 +22,43 @@ $ tramz 'Askims Stationsväg' 'Solrosgatan' 'Nordstan'
 
 ### Stops
 
-#### tramz stops
+#### stops
 Will list the stops you have saved locally.
+```bash
+$ tramz stops
+```
 
-#### tramz stops add [string]
+#### stops add [string]
 Will search for a stop with a name similar to the string you provided and save it for you locally.
+```bash
+$ tramz stops add 'Masthuggstorget'
+```
 
-#### tramz stops remove [name]
+#### stops remove [name]
 Will remove a stop that you have saved locally based on the name you assigned to it.
+```bash
+$ tramz stops remove home
+```
 
 ### Trips
 
-#### tramz trips
+#### trips
 Will list the trips you have saved locally.
+```bash
+$ tramz trips
+```
 
-#### tramz trips add [origin] [destination] [via (optional)]
+#### trips add [origin] [destination] [via (optional)]
 Will search for a trip from **origin** to **destination**, with an optional **via** stop and then save it locally for you.
+```bash
+$ tramz trips add 'Askims Stationsväg' 'Solrosgatan' 'Nordstan'
+```
 
-#### tramz trips remove [name]
+#### trips remove [name]
 Will remove a trip that you have saved locally based on the name you assigned to it.
+```bash
+$ tramz trips remove homeToWork
+```
 
 ## License
 [MIT](LICENSE) © [Max Sandelin](https://maxsandelin.com)
