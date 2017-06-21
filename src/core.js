@@ -7,7 +7,12 @@ function Core () {
   const storeFile = './store/store.json';
 
   // Make sure the store file exists and is a proper Object
-  if (!fs.existsSync(storeFile) || fs.readFileSync(storeFile) === '') fs.writeFileSync(storeFile, JSON.stringify({}));
+  if (!fs.existsSync('./store')) {
+    fs.mkdirSync('./store');
+  }
+  if (!fs.existsSync(storeFile)) {
+    fs.writeFileSync(storeFile, JSON.stringify({}))
+  }
   let data = JSON.parse(fs.readFileSync(storeFile, 'utf8'));
 
   function updateStore () {
@@ -40,7 +45,7 @@ function Core () {
   }
 
   function getAllStops () {
-    return data.stops;
+    return (data.stops) ? data.stops:{};
   }
 
   function getStop (key) {
@@ -80,16 +85,16 @@ function Core () {
     });
   }
 
-  function removeStop (stop) {
-    if (!getStop(string)) return console.log('Could not find the stop "' + string + '"');
+  function removeStop (name) {
+    if (!getStop(name)) return console.log('Could not find the stop "' + name + '"');
 
-    delete data.stops[stop];
+    delete data.stops[name];
     updateStore();
-    console.log('The stop "' + string + '" was successfully removed.');
+    console.log('The stop "' + name + '" was successfully removed.');
   }
 
   function getAllTrips () {
-    return data.trips;
+    return (data.trips) ? data.trips:{};
   }
 
   function getTrip (name) {

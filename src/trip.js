@@ -5,7 +5,7 @@ const async = require('async');
 
 // Modules
 const Core = require('./core.js')();
-const Location = require('./location.js')();
+const Stop = require('./stop.js')();
 
 function Trip () {
 
@@ -77,7 +77,7 @@ function Trip () {
               options[obj.name] = Core.getStop(obj.string);
               callback();
             } else {
-              Location.find(obj.string, token)
+              Stop.find(obj.string, token)
                 .then((stop) => {
                   options[obj.name] = stop;
                   callback();

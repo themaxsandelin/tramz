@@ -5,7 +5,7 @@ const readline = require('readline');
 // Modules
 const Core = require('./core.js')();
 
-function Location () {
+function Stop () {
 
   function list () {
     const stops = Core.getAllStops();
@@ -119,4 +119,4 @@ function Location () {
   }
 }
 
-module.exports = Location;
+module.exports = Stop;

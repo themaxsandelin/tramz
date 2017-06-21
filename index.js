@@ -1,5 +1,7 @@
+#! /usr/bin/env node
+
 // Modules
-const Location = require('./src/location.js')();
+const Stop = require('./src/stop.js')();
 const Trip = require('./src/trip.js')();
 
 const args = process.argv.splice(2, process.argv.length);
@@ -7,14 +9,14 @@ const args = process.argv.splice(2, process.argv.length);
 if (args[0] === 'stops') {
   if (args[1] === 'add') {
     if (args[2]) {
-      return Location.add(args[2]);
+      return Stop.add(args[2]);
     }
   } else if (args[1] === 'remove')  {
     if (args[2]) {
-      return Location.remove(args[2]);
+      return Stop.remove(args[2]);
     }
   } else {
-    return Location.list();
+    return Stop.list();
   }
 } else if (args[0] === 'trips') {
   if (args[1] === 'add') {
