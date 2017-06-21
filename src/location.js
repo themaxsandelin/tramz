@@ -33,10 +33,7 @@ function Location () {
   }
 
   function remove (string) {
-    if (!Core.getStop(string)) return console.log('Could not find a location by the name of ' + string);
-
     Core.removeStop(string);
-    console.log(string + ' was successfully removed.');
   }
 
   function find (string, token) {

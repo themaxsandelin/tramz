@@ -9,39 +9,93 @@ const Location = require('./location.js')();
 
 function Trip () {
 
-  function search (params) {
-    Core.getToken()
-      .then(token => defineOptions(token))
-    .catch(error => console.log(error));
+  function get (name) {
+    return Core.getTrip(name);
+  }
 
-    function defineOptions (token) {
-      const now = moment();
-      const options = {
-        token: token,
-        date: now.format('YYYY-MM-DD'),
-        time: now.format('HH:mm')
-      };
-
-      async.eachSeries(params, (obj, callback) => {
-        if (!obj.string) return callback();
-
-        if (Core.getStop(obj.string)) {
-          options[obj.name] = Core.getStop(obj.string);
-          callback();
-        } else {
-          Location.find(obj.string, token)
-            .then((stop) => {
-              options[obj.name] = stop;
-              callback();
-            })
-          .catch(error => callback(error));
-        }
-      }, (err) => {
-        if (err) return console.log('Shit, something bad happened..!', err);
-
-        findTrip(options);
+  function list () {
+    const trips = Core.getAllTrips();
+    const names = Object.keys(trips);
+    if (!names.length) {
+      console.log('');
+      console.log('You haven\'t saved any trips yet.');
+      console.log('');
+    } else {
+      console.log('');
+      console.log('----------------------------------------------------------------------');
+      names.forEach((name, i) => {
+        if (i) console.log('-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -');
+        console.log('| ' + Core.insertCharacters(' ', name.length) + ' |  From:\t' + trips[name].origin.name);
+        console.log('| ' + name + ' |  To:\t' + trips[name].destination.name);
+        console.log('| ' + Core.insertCharacters(' ', name.length) + ' |  Via:\t' + ((trips[name].via) ? trips[name].via.name:'–'));
       });
+      console.log('----------------------------------------------------------------------');
+      console.log('');
     }
+  }
+
+  function add (params) {
+    setup(params)
+      .then((options) => {
+        const trip = {
+          origin: options.origin,
+          destination: options.destination,
+          via: (options.via) ? options.via:false,
+          departure: false,
+          arrival: false
+        }
+
+        Core.addTrip(trip);
+      })
+    .catch(error => console.log(error));
+  }
+
+  function remove (name) {
+    Core.removeTrip(name);
+  }
+
+  function setup (params) {
+    return new Promise((resolve, reject) => {
+      Core.getToken()
+        .then((token) => {
+          const now = moment();
+          const options = {
+            token: token,
+            date: now.format('YYYY-MM-DD'),
+            time: now.format('HH:mm')
+          };
+
+          async.eachSeries(params, (obj, callback) => {
+            if (!obj.string && !obj.stop) return callback();
+
+            if (obj.stop) {
+              options[obj.name] = obj.stop;
+              return callback();
+            }
+
+            if (Core.getStop(obj.string)) {
+              options[obj.name] = Core.getStop(obj.string);
+              callback();
+            } else {
+              Location.find(obj.string, token)
+                .then((stop) => {
+                  options[obj.name] = stop;
+                  callback();
+                })
+              .catch(error => reject(error));
+            }
+          }, () => {
+            resolve(options);
+          });
+        })
+      .catch(error => reject(error));
+    });
+  }
+
+  function search (params) {
+    setup(params)
+      .then(options => findTrip(options))
+    .catch(error => console.log(error));
 
     function findTrip (options) {
       const url = Core.buildTripUrl(options);
@@ -88,6 +142,10 @@ function Trip () {
   }
 
   return {
+    get,
+    list,
+    add,
+    remove,
     search
   };
 }
