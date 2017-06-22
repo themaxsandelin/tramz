@@ -1,12 +1,25 @@
 #! /usr/bin/env node
 
 // Modules
+const Package = require('./package.json');
+const Core = require('./src/core.js')();
 const Stop = require('./src/stop.js')();
 const Trip = require('./src/trip.js')();
 
 const args = process.argv.splice(2, process.argv.length);
 
-if (args[0] === 'stops') {
+if (!args.length) {
+  console.log('');
+  console.log('Tramz is a CLI client for Västtrafiks Reseplanerare.');
+  console.log('');
+  console.log('  > Type [tramz -h] to see how to use it.');
+  console.log('');
+  return;
+} else if (args[0] === '-h' || args[0] === '--help') {
+  return Core.showHelp();
+} else if (args[0] === '-v') {
+  return console.log(Package.version);
+} else if (args[0] === 'stops') {
   if (args[1] === 'add') {
     if (args[2]) {
       return Stop.add(args[2]);

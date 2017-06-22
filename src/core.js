@@ -150,6 +150,41 @@ function Core () {
     return res;
   }
 
+  function showHelp () {
+    console.log('');
+    console.log('\x1b[36m%s\x1b[0m', 'Tramz.');
+    console.log('');
+    console.log('Usage:');
+    console.log('\x1b[32m%s\x1b[0m', '  tramz <trip>');
+    console.log('  Will search a locally saved trip by name.');
+    console.log('');
+    console.log('\x1b[32m%s\x1b[0m', '  tramz <origin> <destination> <via (optional)>');
+    console.log('  Will search a specific trip from origin to destination, via an optional stop.');
+    console.log('');
+    console.log('\x1b[32m%s\x1b[0m', '  tramz stops');
+    console.log('  Will show a list of your locally saved stops.');
+    console.log('');
+    console.log('\x1b[32m%s\x1b[0m', '  tramz stops add <string>');
+    console.log('  Will find a stop with a name similar to the provided string, and save it locally.');
+    console.log('');
+    console.log('\x1b[32m%s\x1b[0m', '  tramz stops remove <name>');
+    console.log('  Will remove a locally saved stop by the provided name.');
+    console.log('');
+    console.log('\x1b[32m%s\x1b[0m', '  tramz trips');
+    console.log('  Will show a list of your locally saved trips.');
+    console.log('');
+    console.log('\x1b[32m%s\x1b[0m', '  tramz trips add <origin> <destination> <via (optional)>');
+    console.log('  Will search for a trip from origin to destination, via an optional stop, and save it locally.');
+    console.log('');
+    console.log('\x1b[32m%s\x1b[0m', '  tramz trips remove <name>');
+    console.log('  Will remove a locally saved trip based on the provided name.');
+    console.log('');
+    console.log('Options:');
+    console.log('  -h --help \t Will show this screen.');
+    console.log('  -v \t\t Will show the installed version.');
+    console.log('');
+  }
+
   return {
     updateStore,
     getToken,
@@ -163,7 +198,8 @@ function Core () {
     getTrip,
     addTrip,
     removeTrip,
-    insertCharacters
+    insertCharacters,
+    showHelp
   }
 }
 

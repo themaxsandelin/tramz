@@ -1,6 +1,6 @@
 {
   "name": "tramz",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "A CLI for Västtrafiks Reseplaneraren that helps you find trips faster and more conveniently.",
   "author": {
     "name": "Max Sandelin",
