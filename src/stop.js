@@ -19,7 +19,7 @@ function Stop () {
       console.log('----------------------------------------------------------------------');
       names.forEach((name, i) => {
         if (i) console.log('-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -');
-        console.log('[' + name + '] – ' + stops[name].name);
+        console.log('[' + name + '] – ' + stops[name].name + ' (ID: ' + stops[name].id + ')');
       });
       console.log('----------------------------------------------------------------------');
       console.log('');
@@ -27,7 +27,8 @@ function Stop () {
   }
 
   function add (string) {
-    find(string)
+    Core.getPlanKey()
+      .then(key => search(string, key))
       .then(stop => Core.addStop(stop))
     .catch(error => console.log(error));
   }
@@ -36,86 +37,96 @@ function Stop () {
     Core.removeStop(string);
   }
 
-  function find (string, token) {
+  function search (input, key) {
     return new Promise((resolve, reject) => {
-      if (token) {
-        search(string, token)
-          .then(stops => choose(stops, string))
-          .then(stop => resolve(stop))
-        .catch(error => reject(error));
-      } else {
-        Core.getToken()
-          .then(token => search(string, token))
-          .then(stops => choose(stops, string))
-          .then(stop => resolve(stop))
-        .catch(error => reject(error));
-      }
-    });
-  }
+      const url = Core.buildStopSearchUrl(key, input);
 
-  function search (string, token) {
-    return new Promise((resolve, reject) => {
       console.log('');
-      console.log('Searching for ' + string + '...');
+      console.log('Searching for ' + input + '..');
+      request.get(url, (error, response, body) => {
+        const stops = JSON.parse(body).StopLocation;
 
-      const url = 'https://api.vasttrafik.se/bin/rest.exe/v2/location.name?input=' + string + '&format=json';
-      request.get(url, {
-        headers: {
-          'Authorization': 'Bearer ' + token
+        if (!stops.length) {
+          console.log('Could not find a stop with a name similar to ' + input);
+        } else if (stops.length === 1) {
+          console.log('Found only one result (' + stops[0].name + '), so I chose that for you. :)');
+          resolve(stops[0]);
+        } else {
+          chooseStop(stops).then(stop => resolve(stop));
         }
-      }, (error, response, body) => {
-        if (error) console.log(error);
-
-        resolve(JSON.parse(body).LocationList.StopLocation);
       });
     });
-  }
 
-  function choose (stops, string, fast) {
-    return new Promise((resolve, reject) => {
-      if (fast) return resolve(stops[0]);
+    function chooseStop (stops) {
+      return new Promise((resolve, reject) => {
+        console.log('');
+        console.log('We found the following stops with a name similar to "' + input + '"');
+        console.log('----------------------------------------------------------------------');
+        stops.forEach((stop, i) => {
+          if (i) console.log('-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -');
+          console.log('| ' + (i+1) + ' | ' + stop.name);
+        });
+        console.log('----------------------------------------------------------------------');
+        console.log('');
 
-      const rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout
+        askToChoose(stops).then((stop) => {
+          resolve(stop);
+        });
       });
 
-      console.log('');
-      console.log('We found the following stops with a name related to "' + string + '":');
-      console.log('');
-      stops.forEach((stop, i) => {
-        console.log('[ ' + (i + 1) + ' ] ' + stop.name);
-      });
-      console.log('');
-      rl.question('Please select one of the above by typing in the number associated with the stop: ', (answer) => {
+      function askToChoose (stops) {
+        return new Promise((resolve, reject) => {
+          const rl = readline.createInterface({
+            input: process.stdin,
+            output: process.stdout
+          });
+
+          console.log('Select one of the stops above using the number assigned to it: ');
+          rl.on('line', (answer) => {
+            const check = validateChoice(answer);
+            rl.close();
+            if (!check.valid) {
+              console.log('');
+              console.log(check.error);
+              console.log('');
+              return askToChoose(stops).then((stop) => resolve(stop));
+            }
+            resolve(stops[check.answer - 1]);
+          });
+        });
+      }
+
+      function validateChoice (answer) {
         const num = parseInt(answer);
         if (isNaN(num)) {
-          rl.close();
-          console.log('Hey, that\'s not a number.. -_-');
-          return console.log('Try again.');
+          return {
+            valid: false,
+            error: 'Hey, that\'s not a number.. -_-'
+          };
         }
         if (num <= 0) {
-          rl.close();
-          console.log('Yeah, you\'re going to have to use a number greater than 0. Duh?');
-          return console.log('Try again.');
+          return {
+            valid: false,
+            error: 'Yeah, you\'re going to have to use a number greater than 0. Duh?'
+          };
         }
         if (num > stops.length) {
-          rl.close();
-          console.log('Uhm, that\'s more than the number of stops you can choose?');
-          return console.log('Try again.');
-        }
+          return {
+            valid: false,
+            error: 'Uhm, that\'s more than the number of stops you can choose?'
+          };
 
-        rl.close();
-        resolve(stops[num-1]);
-      });
-    });
+        }
+        return { valid: true, answer: num };
+      }
+    }
   }
 
   return {
     add,
     remove,
     list,
-    find
+    search
   }
 }
 

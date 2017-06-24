@@ -5,6 +5,10 @@ const request = require('request');
 
 function Core () {
   const storeFile = './store/store.json';
+  const baseUrls = {
+    stopSearch: 'https://api.resrobot.se/v2/location.name',
+    tripSearch: 'https://api.resrobot.se/v2/trip'
+  }
 
   // Make sure the store file exists and is a proper Object
   if (!fs.existsSync('./store')) {
@@ -29,9 +33,37 @@ function Core () {
     });
   }
 
-  function buildTripUrl (options) {
-    let url = 'https://api.vasttrafik.se/bin/rest.exe/v2/trip';
-    url += '?originId=' + options.origin.id;
+  function getPlanKey () {
+    return new Promise((resolve, reject) => {
+      request('https://api.tramz.io/keys/plan', (error, response, body) => {
+        if (error) reject(error);
+
+        resolve(JSON.parse(body).key);
+      });
+    });
+  }
+
+  function getListKey () {
+    return new Promise((resolve, reject) => {
+      request('https://api.tramz.io/keys/list', (error, response, body) => {
+        if (error) reject(error);
+
+        resolve(JSON.parse(body).key);
+      });
+    });
+  }
+
+  function buildStopSearchUrl (key, input) {
+    let url = baseUrls.stopSearch + '?key=' + key;
+    url += '&input=' + encodeURIComponent(input);
+    url += '&format=json';
+    return url;
+  }
+
+  function buildTripSearchUrl (options) {
+    let url = baseUrls.tripSearch;
+    url += '?key=' + options.key;
+    url += '&originId=' + options.origin.id;
     url += '&destId=' + options.destination.id;
     if (options.via) {
       url += '&viaId=' + options.via.id;
@@ -40,8 +72,17 @@ function Core () {
     return url;
   }
 
-  function simplifyStopName (name) {
-    return (name.indexOf(',' > -1)) ? name.substring(0, name.indexOf(',')):name;
+  function trimTimeString (time) {
+    return time.substring(0, 5);
+  }
+
+  function trimLineName (name) {
+    if (name.indexOf('Länstrafik - ') > -1) {
+      name = name.replace('Länstrafik - ', '');
+    } else if (name.indexOf('Regional Tåg ') === 0) {
+      name = name.replace('Regional Tåg ', '') + '(Regional Tåg)';
+    }
+    return name;
   }
 
   function getAllStops () {
@@ -49,7 +90,7 @@ function Core () {
   }
 
   function getStop (key) {
-    if (!data.stops[key]) return false;
+    if (!data.stops || !data.stops[key]) return false;
 
     return data.stops[key];
   }
@@ -123,7 +164,7 @@ function Core () {
         data.trips[name] = trip;
         updateStore();
 
-        const tripString = 'from "' + simplifyStopName(trip.origin.name) + '" to "' + simplifyStopName(trip.destination.name) + ((trip.via) ? '" via "' + simplifyStopName(trip.via.name) +'"':'"');
+        const tripString = 'from "' + trip.origin.name + '" to "' + trip.destination.name + ((trip.via) ? '" via "' + trip.via.name +'"':'"');
         console.log('');
         console.log('Success!\nYour trip ' + tripString + ' was saved as "' + name + '"');
         console.log('');
@@ -188,8 +229,12 @@ function Core () {
   return {
     updateStore,
     getToken,
-    buildTripUrl,
-    simplifyStopName,
+    getPlanKey,
+    getListKey,
+    buildStopSearchUrl,
+    buildTripSearchUrl,
+    trimTimeString,
+    trimLineName,
     getAllStops,
     getStop,
     addStop,

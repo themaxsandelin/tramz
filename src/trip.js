@@ -22,14 +22,14 @@ function Trip () {
       console.log('');
     } else {
       console.log('');
-      console.log('----------------------------------------------------------------------');
+      console.log('––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––');
       names.forEach((name, i) => {
         if (i) console.log('-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -');
         console.log('| ' + Core.insertCharacters(' ', name.length) + ' |  From:\t' + trips[name].origin.name);
         console.log('| ' + name + ' |  To:\t' + trips[name].destination.name);
         console.log('| ' + Core.insertCharacters(' ', name.length) + ' |  Via:\t' + ((trips[name].via) ? trips[name].via.name:'–'));
       });
-      console.log('----------------------------------------------------------------------');
+      console.log('––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––');
       console.log('');
     }
   }
@@ -56,11 +56,11 @@ function Trip () {
 
   function setup (params) {
     return new Promise((resolve, reject) => {
-      Core.getToken()
-        .then((token) => {
+      Core.getPlanKey()
+        .then((key) => {
           const now = moment();
           const options = {
-            token: token,
+            key: key,
             date: now.format('YYYY-MM-DD'),
             time: now.format('HH:mm')
           };
@@ -77,7 +77,7 @@ function Trip () {
               options[obj.name] = Core.getStop(obj.string);
               callback();
             } else {
-              Stop.find(obj.string, token)
+              Stop.search(obj.string, key)
                 .then((stop) => {
                   options[obj.name] = stop;
                   callback();
@@ -98,45 +98,31 @@ function Trip () {
     .catch(error => console.log(error));
 
     function findTrip (options) {
-      const url = Core.buildTripUrl(options);
-      request.get(url, {
-        headers: { 'Authorization': 'Bearer ' + options.token }
-      }, (err, res, body) => {
-        const trips = JSON.parse(body).TripList.Trip;
+      const url = Core.buildTripSearchUrl(options);
 
-        const origin = Core.simplifyStopName(options.origin.name);
-        const destination = Core.simplifyStopName(options.destination.name);
-        const via = (options.via) ? Core.simplifyStopName(options.via.name):false;
+      request.get(url, (err, res, body) => {
+        const trips = JSON.parse(body).Trip;
+        const origin = options.origin.name;
+        const destination = options.destination.name;
+        const via = (options.via) ? options.via.name:false;
 
         console.log('');
-        console.log('----------------------------------------------------------------------');
+        console.log('––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––');
         console.log('');
         console.log(origin + ' -> ' + ((via) ? via + ' -> ':'') + destination);
         console.log('');
-        trips.forEach((trip, i) => {
-          const parts = trip.Leg;
-
-          if (!i) {
-            console.log('----------------------------------------------------------------------');
-          } else {
-            console.log('-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -');
-          }
-          if (parts.length > 1) {
-            parts.forEach((part) => {
-              if (part.type === 'WALK') {
-                if (part.Origin.name !== part.Destination.name) {
-                  console.log('Gå till ' + part.Destination.name + ' Läge ' + part.Destination.track);
-                }
-              } else {
-                console.log('['+part.Origin.time+' - ' + part.Destination.time + '] ' + part.name + ' \t( ' + Core.simplifyStopName(part.Origin.name) + ' [' + part.Origin.track + '] -> ' + Core.simplifyStopName(part.Destination.name) + ' [' + part.Origin.track + '] )');
-              }
-            });
-          } else {
-            const part = parts;
-            console.log('['+part.Origin.time+' - ' + part.Destination.time + '] ' + part.name + ' – ' + Core.simplifyStopName(part.Origin.name) + ' -> ' + Core.simplifyStopName(part.Destination.name));
-          }
+        console.log('––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––');
+        trips.forEach((trip) => {
+          const parts = trip.LegList.Leg;
+          parts.forEach((part, x) => {
+            console.log('| ' + Core.trimTimeString(part.Origin.time) + ' | ' + ((part.type === 'WALK') ? 'Gå':Core.trimLineName(part.name)));
+            console.log('| ' + Core.trimTimeString(part.Destination.time) + ' | ' + part.Origin.name + ' -> ' + part.Destination.name);
+            if (x !== (parts.length - 1)) {
+              console.log('—  —  —  —  —  —  —  —  —  —  —  —  —  —  —  —  —  —  —  —  —  —  —  —');
+            }
+          });
+          console.log('––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––');
         });
-        console.log('----------------------------------------------------------------------');
       });
     }
   }
