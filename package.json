@@ -1,10 +1,10 @@
 {
   "name": "tramz",
-  "version": "0.2.2",
-  "description": "A CLI for Västtrafiks Reseplaneraren that helps you find trips faster and more conveniently.",
+  "version": "1.0.0",
+  "description": "A CLI client for Swedish public transit that helps you find trips faster and more conveniently.",
   "author": {
     "name": "Max Sandelin",
-    "email": "hello@maxsandelin.com",
+    "email": "themaxsandelin@gmail.com",
     "url": "https://maxsandelin.com"
   },
   "license": "MIT",
@@ -15,17 +15,19 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
-    "cli",
-    "västtrafik",
-    "api",
     "public transit",
+    "cli",
+    "api",
+    "tool",
+    "command line",
     "sweden",
-    "gothenburg"
+    "nodejs",
+    "javascript"
   ],
   "dependencies": {
     "async": "^2.4.1",
-    "commander": "^2.9.0",
     "moment": "^2.18.1",
-    "request": "^2.81.0"
+    "request": "^2.81.0",
+    "rimraf": "^2.6.1"
   }
 }

@@ -2,27 +2,32 @@
 const fs = require('fs');
 const readline = require('readline');
 const request = require('request');
+const async = require('async');
 
 function Core () {
-  const storeFile = './store/store.json';
   const baseUrls = {
     stopSearch: 'https://api.resrobot.se/v2/location.name',
     tripSearch: 'https://api.resrobot.se/v2/trip'
   }
+  let data = getStoreData();
 
-  // Make sure the store file exists and is a proper Object
-  if (!fs.existsSync('./store')) {
-    fs.mkdirSync('./store');
-  }
-  if (!fs.existsSync(storeFile)) {
-    fs.writeFileSync(storeFile, JSON.stringify({}))
-  }
-  let data = JSON.parse(fs.readFileSync(storeFile, 'utf8'));
-
-  function updateStore () {
-    fs.writeFileSync(storeFile, JSON.stringify(data));
+  // Will fetch the locally stored data and if it doesn't exist, make sure to create a base.
+  function getStoreData () {
+    if (!fs.existsSync('./.tramz')) {
+      fs.mkdirSync('./.tramz');
+    }
+    if (!fs.existsSync('./.tramz/store.json')) {
+      fs.writeFileSync('./.tramz/store.json', JSON.stringify({ stops: {}, trips: {} }));
+    }
+    return JSON.parse(fs.readFileSync('./.tramz/store.json', 'utf8'));
   }
 
+  // Simple method to update the contents of the store file with new data.
+  function updateStoreData () {
+    fs.writeFileSync('./.tramz/store.json', JSON.stringify(data));
+  }
+
+  // Deprecated method that will fetch the Västtrafik token for the old version (0.2)
   function getToken () {
     return new Promise((resolve, reject) => {
       request.get('https://api.tramz.io/token', (error, response, body) => {
@@ -95,7 +100,12 @@ function Core () {
     return data.stops[key];
   }
 
-  function addStop (stop) {
+  function addStop (stop, name) {
+    data.stops[name] = stop;
+    updateStoreData();
+  }
+
+  function addStopOld (stop) {
     return new Promise((resolve, reject) => {
       data.stops = data.stops || {};
       delete stop.idx;
@@ -114,7 +124,7 @@ function Core () {
         }
 
         data.stops[name] = stop;
-        updateStore();
+        updateStoreData();
 
         console.log('');
         console.log('Success!\n"' + stop.name + '" was saved with the name "' + name +'".');
@@ -130,7 +140,7 @@ function Core () {
     if (!getStop(name)) return console.log('Could not find the stop "' + name + '"');
 
     delete data.stops[name];
-    updateStore();
+    updateStoreData();
     console.log('The stop "' + name + '" was successfully removed.');
   }
 
@@ -144,7 +154,12 @@ function Core () {
     return data.trips[name];
   }
 
-  function addTrip (trip) {
+  function addTrip (trip, name) {
+    data.trips[name] = trip;
+    updateStoreData();
+  }
+
+  function addTripOld (trip) {
     return new Promise((resolve, reject) => {
       data.trips = data.trips || {};
 
@@ -162,7 +177,7 @@ function Core () {
         }
 
         data.trips[name] = trip;
-        updateStore();
+        updateStoreData();
 
         const tripString = 'from "' + trip.origin.name + '" to "' + trip.destination.name + ((trip.via) ? '" via "' + trip.via.name +'"':'"');
         console.log('');
@@ -179,7 +194,7 @@ function Core () {
     if (!getTrip(name)) return console.log('Could not find the trip "' + name + '".');
 
     delete data.trips[name];
-    updateStore();
+    updateStoreData();
     console.log('The trip "' + name + '" was successfully removed.');
   }
 
@@ -227,7 +242,8 @@ function Core () {
   }
 
   return {
-    updateStore,
+    data,
+    updateStoreData,
     getToken,
     getPlanKey,
     getListKey,
@@ -238,10 +254,12 @@ function Core () {
     getAllStops,
     getStop,
     addStop,
+    addStopOld,
     removeStop,
     getAllTrips,
     getTrip,
     addTrip,
+    addTripOld,
     removeTrip,
     insertCharacters,
     showHelp

@@ -2,10 +2,7 @@
 const request = require('request');
 const readline = require('readline');
 
-// Modules
-const Core = require('./core.js')();
-
-function Stop () {
+function Stop (Core) {
 
   function list () {
     const stops = Core.getAllStops();
@@ -29,7 +26,7 @@ function Stop () {
   function add (string) {
     Core.getPlanKey()
       .then(key => search(string, key))
-      .then(stop => Core.addStop(stop))
+      .then(stop => Core.addStopOld(stop))
     .catch(error => console.log(error));
   }
 

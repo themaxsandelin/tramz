@@ -3,11 +3,7 @@ const request = require('request');
 const moment = require('moment');
 const async = require('async');
 
-// Modules
-const Core = require('./core.js')();
-const Stop = require('./stop.js')();
-
-function Trip () {
+function Trip (Core) {
 
   function get (name) {
     return Core.getTrip(name);
@@ -45,7 +41,7 @@ function Trip () {
           arrival: false
         }
 
-        Core.addTrip(trip);
+        Core.addTripOld(trip);
       })
     .catch(error => console.log(error));
   }
