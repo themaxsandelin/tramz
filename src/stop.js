@@ -16,7 +16,7 @@ function Stop (Core) {
       console.log('----------------------------------------------------------------------');
       names.forEach((name, i) => {
         if (i) console.log('-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -');
-        console.log('[' + name + '] – ' + stops[name].name + ' (ID: ' + stops[name].id + ')');
+        console.log('| ' + name + ' |  ' + stops[name].name + ' (ID: ' + stops[name].id + ')');
       });
       console.log('----------------------------------------------------------------------');
       console.log('');

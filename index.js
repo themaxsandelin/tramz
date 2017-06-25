@@ -1,4 +1,5 @@
 #! /usr/bin/env node
+
 // Dependencies
 const fs = require('fs');
 const rimraf = require('rimraf');
