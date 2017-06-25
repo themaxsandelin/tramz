@@ -3,7 +3,7 @@ const request = require('request');
 const moment = require('moment');
 const async = require('async');
 
-function Trip (Core) {
+function Trip (Core, Stop) {
 
   function get (name) {
     return Core.getTrip(name);
@@ -90,7 +90,7 @@ function Trip (Core) {
 
   function search (params) {
     setup(params)
-      .then(options => findTrip(options))
+      .then(options => findTrip(options, Stop))
     .catch(error => console.log(error));
 
     function findTrip (options) {
