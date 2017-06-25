@@ -1,5 +1,5 @@
 # Tramz
-A CLI client that uses Västtrafiks API to make it super easy for you to search trips and/or stops, and also save them locally to make finding the next bus/tram much easier.
+A CLI client for public transit in Sweden to make it super easy for you to search trips and/or stops, and also save them locally to make finding the next bus/tram much easier.
 
 ## Installation
 `$ npm install -g tramz`
