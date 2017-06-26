@@ -4,6 +4,7 @@
 const fs = require('fs');
 const rimraf = require('rimraf');
 const async = require('async');
+const homeDir = require('home-dir');
 
 // Modules
 const Package = require('./package.json');
@@ -13,8 +14,8 @@ const Trip = require('./src/trip.js')(Core, Stop);
 
 // Store migration from 0.2 to 1.0
 // Migration script to migrate the old store data to the new folder and accommodate for the new IDs from Resrobot.
-if (fs.existsSync('./store') && fs.existsSync('./store/store.json')) {
-  const oldData = JSON.parse(fs.readFileSync('./store/store.json'));
+if (fs.existsSync(homeDir('/store')) && fs.existsSync(homeDir('/store/store.json'))) {
+  const oldData = JSON.parse(fs.readFileSync(homeDir('/store/store.json')));
   const migrationData = [];
 
   // Migrate stops
@@ -45,7 +46,7 @@ if (fs.existsSync('./store') && fs.existsSync('./store/store.json')) {
     });
   }
 
-  rimraf.sync('./store');
+  rimraf.sync(homeDir('/store'));
 
   if (migrationData.length) {
     console.log('');

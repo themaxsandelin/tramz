@@ -27,6 +27,7 @@
   ],
   "dependencies": {
     "async": "^2.4.1",
+    "home-dir": "^1.0.0",
     "moment": "^2.18.1",
     "request": "^2.81.0",
     "rimraf": "^2.6.1"

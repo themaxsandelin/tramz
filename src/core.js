@@ -3,28 +3,31 @@ const fs = require('fs');
 const readline = require('readline');
 const request = require('request');
 const async = require('async');
+const homeDir = require('home-dir');
 
 function Core () {
   const baseUrls = {
     stopSearch: 'https://api.resrobot.se/v2/location.name',
     tripSearch: 'https://api.resrobot.se/v2/trip'
   }
+  const storeDir = homeDir('/.tramz');
+  const storeFile = storeDir + '/store.json';
   let data = getStoreData();
 
   // Will fetch the locally stored data and if it doesn't exist, make sure to create a base.
   function getStoreData () {
-    if (!fs.existsSync('./.tramz')) {
-      fs.mkdirSync('./.tramz');
+    if (!fs.existsSync(storeDir)) {
+      fs.mkdirSync(storeDir);
     }
-    if (!fs.existsSync('./.tramz/store.json')) {
-      fs.writeFileSync('./.tramz/store.json', JSON.stringify({ stops: {}, trips: {} }));
+    if (!fs.existsSync(storeFile)) {
+      fs.writeFileSync(storeFile, JSON.stringify({ stops: {}, trips: {} }));
     }
-    return JSON.parse(fs.readFileSync('./.tramz/store.json', 'utf8'));
+    return JSON.parse(fs.readFileSync(storeFile, 'utf8'));
   }
 
   // Simple method to update the contents of the store file with new data.
   function updateStoreData () {
-    fs.writeFileSync('./.tramz/store.json', JSON.stringify(data));
+    fs.writeFileSync(storeFile, JSON.stringify(data));
   }
 
   // Deprecated method that will fetch the Västtrafik token for the old version (0.2)
@@ -243,6 +246,8 @@ function Core () {
 
   return {
     data,
+    storeDir,
+    storeFile,
     updateStoreData,
     getToken,
     getPlanKey,
