@@ -1,6 +1,6 @@
 {
   "name": "tramz",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A CLI client for Swedish public transit that helps you find trips faster and more conveniently.",
   "author": {
     "name": "Max Sandelin",
