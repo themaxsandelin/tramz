@@ -99,7 +99,7 @@ if (fs.existsSync(homeDir('/store')) && fs.existsSync(homeDir('/store/store.json
 const args = process.argv.splice(2, process.argv.length);
 if (!args.length) {
   console.log('');
-  console.log('Tramz is a CLI client for Västtrafiks Reseplanerare.');
+  console.log('Tramz is a CLI client for public transit in Sweden.');
   console.log('');
   console.log('  > Type [tramz -h] to see how to use it.');
   console.log('');
