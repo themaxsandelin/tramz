@@ -97,6 +97,15 @@ function Trip (Core, Stop) {
       const url = Core.buildTripSearchUrl(options);
 
       request.get(url, (err, res, body) => {
+        if (error) {
+          if (error.code === 'ENOTFOUND') {
+            reject('Sorry, but you don\'t seem to have an internet connection, so we can\'t proceed with this action at the moment.');
+          } else {
+            reject('Oops, something went wrong when we tried to search for your trip. Sorry about that.');
+          }
+          return;
+        }
+
         const trips = JSON.parse(body).Trip;
         const origin = options.origin.name;
         const destination = options.destination.name;

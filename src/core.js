@@ -34,7 +34,14 @@ function Core () {
   function getToken () {
     return new Promise((resolve, reject) => {
       request.get('https://api.tramz.io/token', (error, response, body) => {
-        if (error) reject(error);
+        if (error) {
+          if (error.code === 'ENOTFOUND') {
+            reject('Sorry, but you don\'t seem to have an internet connection, so we can\'t proceed with this action at the moment.');
+          } else {
+            reject('Oops, something went wrong when contacting the API. Sorry about that.');
+          }
+          return;
+        }
 
         resolve(JSON.parse(body).token);
       });
@@ -44,7 +51,14 @@ function Core () {
   function getPlanKey () {
     return new Promise((resolve, reject) => {
       request('https://api.tramz.io/keys/plan', (error, response, body) => {
-        if (error) reject(error);
+        if (error) {
+          if (error.code === 'ENOTFOUND') {
+            reject('Sorry, but you don\'t seem to have an internet connection, so we can\'t proceed with this action at the moment.');
+          } else {
+            reject('Oops, something went wrong when contacting the API. Sorry about that.');
+          }
+          return;
+        }
 
         resolve(JSON.parse(body).key);
       });
@@ -53,8 +67,16 @@ function Core () {
 
   function getListKey () {
     return new Promise((resolve, reject) => {
+
       request('https://api.tramz.io/keys/list', (error, response, body) => {
-        if (error) reject(error);
+        if (error) {
+          if (error.code === 'ENOTFOUND') {
+            reject('Sorry, but you don\'t seem to have an internet connection, so we can\'t proceed with this action at the moment.');
+          } else {
+            reject('Oops, something went wrong when contacting the API. Sorry about that.');
+          }
+          return;
+        }
 
         resolve(JSON.parse(body).key);
       });

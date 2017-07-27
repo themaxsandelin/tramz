@@ -41,6 +41,15 @@ function Stop (Core) {
       console.log('');
       console.log('Searching for ' + input + '..');
       request.get(url, (error, response, body) => {
+        if (error) {
+          if (error.code === 'ENOTFOUND') {
+            reject('Sorry, but you don\'t seem to have an internet connection, so we can\'t proceed with this action at the moment.');
+          } else {
+            reject('Oops, something went wrong when we tried to find your stop. Sorry about that.');
+          }
+          return;
+        }
+
         const stops = JSON.parse(body).StopLocation;
 
         if (!stops.length) {
