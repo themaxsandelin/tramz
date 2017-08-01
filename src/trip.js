@@ -96,7 +96,7 @@ function Trip (Core, Stop) {
     function findTrip (options) {
       const url = Core.buildTripSearchUrl(options);
 
-      request.get(url, (err, res, body) => {
+      request.get(url, (error, response, body) => {
         if (error) {
           if (error.code === 'ENOTFOUND') {
             reject('Sorry, but you don\'t seem to have an internet connection, so we can\'t proceed with this action at the moment.');
