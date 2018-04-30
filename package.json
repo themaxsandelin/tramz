@@ -1,11 +1,10 @@
 {
   "name": "tramz",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "A CLI client for Swedish public transit that helps you find trips faster and more conveniently.",
   "author": {
     "name": "Max Sandelin",
-    "email": "themaxsandelin@gmail.com",
-    "url": "https://maxsandelin.com"
+    "url": "https://github.com/themaxsandelin"
   },
   "license": "MIT",
   "repository": "themaxsandelin/tramz",
